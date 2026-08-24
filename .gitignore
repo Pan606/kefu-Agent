@@ -1,0 +1,24 @@
+# IDE
+.idea/
+.vscode/
+
+# WorkBuddy 项目数据
+.workbuddy/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# 环境变量与密钥
+.env
+.env.*
+
+# 日志
+*.log
+
+# 设计文档（不纳入版本控制）
+智能客服Agent设计文档.docx
+智能客服Agent设计文档_v2.docx
