@@ -1,16 +1,41 @@
-# 这是一个示例 Python 脚本。
+"""智能客服 Agent 启动入口。
 
-# 按 Shift+F10 执行或将其替换为您的代码。
-# 按 双击 Shift 在所有地方搜索类、文件、工具窗口、操作和设置。
+用法：
+    python main.py              # 启动 Web 服务 → http://127.0.0.1:8761
+    python main.py --init       # 先重建知识库索引再启动
+    python main.py --seed       # 先重新生成演示数据（FAQ + 模拟订单）再启动
+"""
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from app import memory, observability  # noqa: E402
 
 
-def print_hi(name):
-    # 在下面的代码行中使用断点来调试脚本。
-    print(f'Hi, {name}')  # 按 Ctrl+F8 切换断点。
+def main() -> None:
+    args = set(sys.argv[1:])
+    if "--seed" in args:
+        from scripts import seed_data
+        seed_data.main()
+    if "--init" in args:
+        from scripts import init_kb
+        init_kb.main()
+    if "--server" in args or "--seed" in args or "--init" in args:
+        from app.web_server import main as server_main
+        server_main()
+    else:
+        memory.init_db()
+        observability.init_observability()
+        print("用法：")
+        print("  python main.py           启动 Web 服务（http://127.0.0.1:8761）")
+        print("  python main.py --init    重建知识库索引后启动")
+        print("  python main.py --seed    重新生成演示数据后启动")
+        print("  python tests/eval_set.py --run   运行评估集")
 
 
-# 按装订区域中的绿色按钮以运行脚本。
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# 访问 https://www.jetbrains.com/help/pycharm/ 获取 PyCharm 帮助
+if __name__ == "__main__":
+    main()

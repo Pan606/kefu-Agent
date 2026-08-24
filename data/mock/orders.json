@@ -1,0 +1,47 @@
+[
+  {
+    "order_id": "O20260824001",
+    "customer_name": "王小明",
+    "status": "已发货",
+    "amount": 299.0,
+    "product": "云客服标准版（月付）",
+    "created_at": "2026-08-22 10:24:00",
+    "logistics_no": "SF1234567890"
+  },
+  {
+    "order_id": "O20260823002",
+    "customer_name": "李华",
+    "status": "待支付",
+    "amount": 899.0,
+    "product": "云客服专业版（月付）",
+    "created_at": "2026-08-23 14:05:00",
+    "logistics_no": ""
+  },
+  {
+    "order_id": "O20260821003",
+    "customer_name": "张伟",
+    "status": "已完成",
+    "amount": 1794.0,
+    "product": "云客服标准版（年付）",
+    "created_at": "2026-08-15 09:30:00",
+    "logistics_no": "SF9876543210"
+  },
+  {
+    "order_id": "O20260820004",
+    "customer_name": "赵敏",
+    "status": "已发货",
+    "amount": 495.0,
+    "product": "坐席增值包 ×5",
+    "created_at": "2026-08-20 16:40:00",
+    "logistics_no": "ZT1122334455"
+  },
+  {
+    "order_id": "O20260818005",
+    "customer_name": "陈强",
+    "status": "退款中",
+    "amount": 899.0,
+    "product": "云客服专业版（月付）",
+    "created_at": "2026-08-18 11:12:00",
+    "logistics_no": ""
+  }
+]

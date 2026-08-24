@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智能客服 Agent</title>
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-light: #eff6ff;
+    --bg: #f5f7fa;
+    --card: #ffffff;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --ai-bubble: #ffffff;
+    --user-bubble: #2563eb;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  header h1 { font-size: 18px; font-weight: 600; }
+  header .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  header .actions { display: flex; gap: 8px; }
+  .btn {
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .btn:hover { border-color: var(--primary); color: var(--primary); }
+  .btn.primary {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+  .btn.primary:hover { opacity: .9; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+  #chat {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 860px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  .msg { display: flex; gap: 10px; max-width: 78%; }
+  .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+  .avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .msg.user .avatar { background: var(--primary); }
+  .msg.ai .avatar { background: #e5e7eb; }
+  .bubble {
+    background: var(--ai-bubble);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 14px;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    word-break: break-word;
+    box-shadow: 0 1px 2px rgba(0,0,0,.04);
+  }
+  .msg.user .bubble {
+    background: var(--user-bubble);
+    color: #fff;
+    border: none;
+    border-radius: 12px 12px 2px 12px;
+  }
+  .meta { font-size: 11px; color: var(--muted); margin-top: 6px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .meta .tag {
+    background: var(--primary-light);
+    color: var(--primary);
+    padding: 2px 8px; border-radius: 10px;
+    font-size: 11px;
+  }
+  .meta .cite { color: var(--primary); cursor: pointer; }
+  .meta button {
+    border: none; background: none; color: var(--muted);
+    cursor: pointer; font-size: 12px; padding: 0;
+  }
+  .meta button:hover { color: var(--primary); }
+  .thinking {
+    font-size: 13px; color: var(--muted);
+    display: flex; align-items: center; gap: 8px;
+    padding: 4px 0;
+  }
+  .dot { animation: blink 1s infinite; }
+  .dot:nth-child(2) { animation-delay: .2s; }
+  .dot:nth-child(3) { animation-delay: .4s; }
+  @keyframes blink { 0%,80%,100%{opacity:.2} 40%{opacity:1} }
+
+  #input-bar {
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    padding: 14px 24px;
+  }
+  #input-wrap {
+    max-width: 860px; margin: 0 auto;
+    display: flex; gap: 10px;
+  }
+  #input {
+    flex: 1;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    outline: none;
+    resize: none;
+    font-family: inherit;
+  }
+  #input:focus { border-color: var(--primary); }
+  .banner {
+    background: #fef3c7; color: #92400e;
+    font-size: 12px; padding: 8px 24px;
+    text-align: center;
+  }
+  .empty-tip {
+    text-align: center; color: var(--muted);
+    margin: 60px auto; font-size: 14px; line-height: 2;
+  }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>🤖 智能客服 Agent</h1>
+    <div class="sub">演示版 · 知识库问答 / 订单物流查询 / 转人工</div>
+  </div>
+  <div class="actions">
+    <button class="btn" id="btn-transfer">转人工</button>
+    <button class="btn" id="btn-clear">新会话</button>
+  </div>
+</header>
+
+<div id="chat">
+  <div class="empty-tip">
+    您好，我是智能客服助手 👋<br>
+    可以问我：<br>
+    「云客服标准版多少钱？」「怎么申请退订？」<br>
+    「查询订单 O20260824001」「我的订单物流到哪了？」
+  </div>
+</div>
+
+<div id="input-bar">
+  <div id="input-wrap">
+    <textarea id="input" rows="1" placeholder="请输入您的问题…（Enter 发送，Shift+Enter 换行）"></textarea>
+    <button class="btn primary" id="btn-send">发送</button>
+  </div>
+</div>
+
+<script>
+const chatEl = document.getElementById('chat');
+const inputEl = document.getElementById('input');
+const sendBtn = document.getElementById('btn-send');
+
+let sessionId = localStorage.getItem('kefu_session_id') || null;
+
+// ---------- 消息渲染 ----------
+function addMsg(role, content, extra = {}) {
+  // 移除空态提示
+  const tip = chatEl.querySelector('.empty-tip');
+  if (tip) tip.remove();
+
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  const avatar = document.createElement('div');
+  avatar.className = 'avatar';
+  avatar.textContent = role === 'user' ? '🙋' : '🤖';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.textContent = content;
+  div.appendChild(avatar);
+  div.appendChild(bubble);
+
+  if (role === 'ai') {
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    if (extra.intent) {
+      const tag = document.createElement('span');
+      tag.className = 'tag';
+      tag.textContent = `意图：${extra.intent}`;
+      meta.appendChild(tag);
+    }
+    if (extra.citations && extra.citations.length) {
+      const cite = document.createElement('span');
+      cite.className = 'cite';
+      cite.textContent = `📚 ${extra.citations.join('；')}`;
+      meta.appendChild(cite);
+    }
+    if (extra.transferred) {
+      const t = document.createElement('span');
+      t.textContent = '已转人工 ✓';
+      meta.appendChild(t);
+    }
+    // 满意度评价
+    const msgId = Date.now() + Math.random().toString(36).slice(2, 7);
+    const usefulBtn = document.createElement('button');
+    usefulBtn.textContent = '👍 有用';
+    usefulBtn.onclick = () => sendFeedback(msgId, 'useful', usefulBtn);
+    const uselessBtn = document.createElement('button');
+    uselessBtn.textContent = '👎 没用';
+    uselessBtn.onclick = () => sendFeedback(msgId, 'useless', uselessBtn);
+    meta.appendChild(usefulBtn);
+    meta.appendChild(uselessBtn);
+    bubble.parentElement.appendChild(meta);
+  }
+  chatEl.appendChild(div);
+  chatEl.scrollTop = chatEl.scrollHeight;
+  return div;
+}
+
+function showThinking() {
+  const div = document.createElement('div');
+  div.className = 'thinking';
+  div.id = 'thinking';
+  div.innerHTML = '思考中 <span class="dot">●</span><span class="dot">●</span><span class="dot">●</span>';
+  chatEl.appendChild(div);
+  chatEl.scrollTop = chatEl.scrollHeight;
+}
+
+function hideThinking() {
+  const t = document.getElementById('thinking');
+  if (t) t.remove();
+}
+
+// ---------- 满意度评价 ----------
+async function sendFeedback(messageId, rating, btn) {
+  if (!sessionId) return;
+  btn.disabled = true;
+  btn.textContent = rating === 'useful' ? '👍 已评价' : '👎 已评价';
+  try {
+    await fetch('/api/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_id: sessionId, message_id: messageId, rating }),
+    });
+  } catch (e) { /* 静默失败 */ }
+}
+
+// ---------- 发送消息（fetch + SSE 流解析） ----------
+async function send() {
+  const text = inputEl.value.trim();
+  if (!text || sendBtn.disabled) return;
+  inputEl.value = '';
+  inputEl.style.height = 'auto';
+
+  if (!sessionId) {
+    try {
+      const r = await fetch('/api/session', { method: 'POST' });
+      const d = await r.json();
+      sessionId = d.session_id;
+      localStorage.setItem('kefu_session_id', sessionId);
+    } catch (e) {
+      addMsg('ai', '服务连接失败，请确认后端已启动。');
+      return;
+    }
+  }
+
+  addMsg('user', text);
+  showThinking();
+  sendBtn.disabled = true;
+  inputEl.disabled = true;
+
+  try {
+    const resp = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_id: sessionId, message: text }),
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      hideThinking();
+      addMsg('ai', `请求失败（${resp.status}）：${err.detail || '未知错误'}`);
+      return;
+    }
+
+    // 解析 SSE 流
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let replied = false;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const events = buffer.split('\n\n');
+      buffer = events.pop();
+      for (const evt of events) {
+        const lines = evt.split('\n');
+        const type = (lines.find(l => l.startsWith('event:')) || '').replace('event:', '').trim();
+        const dataLine = lines.find(l => l.startsWith('data:'));
+        if (!dataLine) continue;
+        const data = JSON.parse(dataLine.replace('data:', '').trim());
+        if (type === 'node') {
+          // 更新思考提示
+          const t = document.getElementById('thinking');
+          if (t) {
+            const label = { intent_router: '识别意图', rag_retrieve: '检索知识库',
+              tool_execute: '调用业务工具', safety_check: '安全检查',
+              fallback: '兜底处理' }[data.node] || data.node;
+            t.innerHTML = `${label}中 <span class="dot">●</span><span class="dot">●</span><span class="dot">●</span>`;
+          }
+        } else if (type === 'message') {
+          hideThinking();
+          addMsg('ai', data.response, {
+            intent: data.intent,
+            citations: data.citations,
+            transferred: !!data.transfer_package,
+          });
+          replied = true;
+        } else if (type === 'error') {
+          hideThinking();
+          addMsg('ai', `出错了：${data.error || '未知错误'}`);
+          replied = true;
+        }
+      }
+    }
+    if (!replied) {
+      hideThinking();
+      addMsg('ai', '（未收到回复，请重试）');
+    }
+  } catch (e) {
+    hideThinking();
+    addMsg('ai', `网络错误：${e.message}`);
+  } finally {
+    sendBtn.disabled = false;
+    inputEl.disabled = false;
+    inputEl.focus();
+  }
+}
+
+// ---------- 事件绑定 ----------
+sendBtn.onclick = send;
+inputEl.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    send();
+  }
+});
+inputEl.addEventListener('input', () => {
+  inputEl.style.height = 'auto';
+  inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
+});
+
+document.getElementById('btn-clear').onclick = async () => {
+  try {
+    const r = await fetch('/api/session', { method: 'POST' });
+    const d = await r.json();
+    sessionId = d.session_id;
+    localStorage.setItem('kefu_session_id', sessionId);
+  } catch (e) { sessionId = null; localStorage.removeItem('kefu_session_id'); }
+  chatEl.innerHTML = '';
+  const tip = document.createElement('div');
+  tip.className = 'empty-tip';
+  tip.innerHTML = '新会话已开始 👋<br>请问有什么可以帮您？';
+  chatEl.appendChild(tip);
+};
+
+document.getElementById('btn-transfer').onclick = async () => {
+  if (!sessionId) return;
+  try {
+    const r = await fetch('/api/transfer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_id: sessionId }),
+    });
+    if (r.ok) addMsg('ai', '已为您转接人工客服，请稍候。您的会话信息已同步。');
+  } catch (e) { /* 忽略 */ }
+};
+
+// 恢复历史会话
+(async () => {
+  if (!sessionId) return;
+  try {
+    const r = await fetch(`/api/session/${sessionId}`);
+    if (!r.ok) { localStorage.removeItem('kefu_session_id'); return; }
+    const d = await r.json();
+    for (const m of d.messages) {
+      addMsg(m.role === 'user' ? 'user' : 'ai', m.content);
+    }
+  } catch (e) { /* 忽略 */ }
+})();
+</script>
+</body>
+</html>

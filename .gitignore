@@ -15,6 +15,7 @@ venv/
 # 环境变量与密钥
 .env
 .env.*
+!.env.example
 
 # 日志
 *.log

@@ -1,0 +1,14 @@
+# 智能客服 Agent V1.0 依赖（与 LangChain 1.x 生态对齐）
+langchain>=1.0,<2.0
+langgraph>=1.0
+langchain-openai>=1.4
+langchain-chroma>=1.0
+langchain-text-splitters>=1.0
+chromadb>=1.0
+fastapi>=0.115
+uvicorn>=0.30
+sse-starlette>=2.1
+python-dotenv>=1.0
+pydantic>=2.0
+# 可观测性（可选：不填 Langfuse key 时自动降级，无需安装也可运行）
+# langfuse>=2.0
